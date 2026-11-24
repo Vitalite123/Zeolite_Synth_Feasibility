@@ -1,0 +1,101 @@
+{
+  "task": "feasibility_scorer v1.2 (M12 交付物: CLI + Python API; L3 COMP v2)",
+  "scorer_version": "v1_2",
+  "date": "2026-10-22 16:55:46",
+  "git_head": "518fe5f6d9909ca388d2278444407a1315e63340",
+  "code_md5": {
+    "feasibility_scorer_v1_2.py": "467e33fa4310abb255b9199a1c2d434c"
+  },
+  "code_md5_current": {
+    "feasibility_scorer_v1_2.py": "c3fd9694a4a7a642a2340ffe2133d410"
+  },
+  "code_md5_note": "code_md5 为拟合时快照；当前代码差异仅来自部署入口 cwd 修复（2026-10-22 ⑧），fit/锚点路径未变，未重拟合故不覆盖快照",
+  "data_version": "zeobench_db_v1_8 + zeobench_splits_v1_8",
+  "heads": {
+    "L1": {
+      "protocol": "mirror m10 arm_l1 (build_a3 A3 490)",
+      "n_domain": 13286,
+      "n_class": 198,
+      "rounds": 118,
+      "T": 1.2458224611645041
+    },
+    "L2-xtal": {
+      "protocol": "mirror m10 arm_l2 (xtal 主口径 Q19)",
+      "n_domain": 24113,
+      "n_class": 2,
+      "rounds": 36,
+      "T": 0.9434228379288907
+    },
+    "L2-pure": {
+      "protocol": "mirror m10 arm_l2 (pure 参照)",
+      "n_domain": 24113,
+      "n_class": 2,
+      "rounds": 59,
+      "T": 1.1836347450264775
+    },
+    "L3": {
+      "protocol": "mirror m10 arm_l3 (fit_v1 comp=v2 498 + sidecar)",
+      "n_domain": 17364,
+      "n_class": 200,
+      "rounds": 128,
+      "T": 1.2845444739568956
+    }
+  },
+  "anchors_expected": {
+    "L1": {
+      "random": 0.571,
+      "heldout": 0.2402,
+      "time_2018": 0.6973
+    },
+    "L2xt": {
+      "random": 0.6307,
+      "heldout": 0.5158,
+      "time_2018": 0.665
+    },
+    "L2pu": {
+      "random": 0.621,
+      "heldout": 0.5432,
+      "time_2018": 0.6271
+    },
+    "L3": {
+      "random": 0.5565,
+      "heldout": 0.2617,
+      "time_2018": 0.657
+    }
+  },
+  "anchors_measured": {
+    "L1/random": 0.5710306406685237,
+    "L1/heldout": 0.24019312009656005,
+    "L1/time_2018": 0.6973365617433414,
+    "L2xt/random": 0.6307095094096244,
+    "L2xt/heldout": 0.5157779403567446,
+    "L2xt/time_2018": 0.6649824618500035,
+    "L2pu/random": 0.6210237523055588,
+    "L2pu/heldout": 0.5432350124976404,
+    "L2pu/time_2018": 0.6271320198382446,
+    "L3/random": 0.5565019875070982,
+    "L3/heldout": 0.2616702355460385,
+    "L3/time_2018": 0.657016991818754
+  },
+  "anchors_pass_all": true,
+  "temperature": {
+    "L1": 1.2458224611645041,
+    "L2xt": 0.9434228379288907,
+    "L2pu": 1.1836347450264775,
+    "L3": 1.2845444739568956,
+    "L3_frozen_v1_2": 1.2845
+  },
+  "model_bundle": {
+    "path": "feasibility_scorer_v1_2_model.pkl",
+    "md5": "fa0889f9db9118ef7d6b39448ac6f12a"
+  },
+  "benchmark_skeleton": "feasibility_scorer_v1_2_基准报告_骨架.md",
+  "cli": "fit|selfcheck|score --input --out [--target]",
+  "freeze": {
+    "date": "2026-10-23",
+    "git_head": "19d433ea8393593a3bfc79363828f5f499321b90",
+    "selfcheck": "PASS",
+    "scope": "M12 G2 收口：12 锚点、四条验收行读数、口径 A+E 冻结",
+    "rule": "任何改动须升版 v1.3 并重新预注册；不得就地改锚点或验收行"
+  }
+}

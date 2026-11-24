@@ -1,0 +1,38 @@
+{
+  "task": "P2-2 补充实验 S1–S4",
+  "prereg": "wp2_p22_supp_立项_骨架.md v0.1",
+  "date": "2026-11-24 14:55:38",
+  "duration_min": 0.94,
+  "code_md5": {
+    "wp2_p22_supp_v0.py": "85428da28978443bdf6692310f2f6f0a"
+  },
+  "data_md5": {
+    "zeosyn_db_v1_1.parquet": "b916bd34194e731cde561c7b7d68e514",
+    "zeosyn_splits_v1_1.parquet": "d6204968b2fac96fd5425928307cf9c5",
+    "zeobench_db_v1_8.parquet": "9b494df55e0daf9e333a33b257c7d750",
+    "feasibility_scorer_v1_2_model.pkl": "fa0889f9db9118ef7d6b39448ac6f12a"
+  },
+  "anchor": {
+    "expected": 0.6307095094096244,
+    "measured": 0.6307095094096244,
+    "rounds": 36,
+    "pass": true
+  },
+  "settings": {
+    "n_fold": 10,
+    "rounds": 36,
+    "T": 0.9434228379288907,
+    "fractions": [
+      0.1,
+      0.25,
+      0.5,
+      1.0
+    ],
+    "seeds": [
+      0,
+      1,
+      2
+    ],
+    "n_boot": 1000
+  }
+}

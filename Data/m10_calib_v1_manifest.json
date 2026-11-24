@@ -1,0 +1,74 @@
+{
+  "task": "M10 校准报告 v1 (reliability diagram + ECE ≤0.05 + temperature scaling; 三臂 × 三切分)",
+  "date": "2026-10-22 13:06:10",
+  "git_head": "5a50d2f4748b5e1e594029f456cb59adfa1fe9a5",
+  "code_md5": {
+    "m10_calib_v1.py": "a3dbc001a69f46059ff4119ba4473af0"
+  },
+  "data_version": "zeobench_db_v1_8 + zeobench_splits_v1_8",
+  "calibration": {
+    "ece": "l3_purity_v1.ece (max-prob 置信度 10 箱)",
+    "temperature": "l3_purity_v1.fit_temperature (random val NLL 最小, 三切分共用冻结)",
+    "proba_with_T": "l3_purity_v1.proba_with_T (log-prob 当 logits, 除以 T 后 softmax)",
+    "target_ECE": 0.05
+  },
+  "protocol": {
+    "L1": "镜像 m10_time_extrap_v0.part_a1 (build_a3 A3 490 维, OSDA 默认表; 相分类 198 类)",
+    "L2": "镜像 m10_time_extrap_v0.part_a2 (v1.1 剔 Tier A + lit_fail + 增量; binary; pure 早停轮锚定 heldout/time; seed 42)",
+    "L3": "镜像 m10_time_extrap_v0.part_a3 (l3_purity_v1.fit_v1 498 维 + sidecar 回填; 多分类 200 类)"
+  },
+  "hyperparams": {
+    "LGBM": "learning_rate=0.05, num_leaves=31, min_child_samples=100, lambda_l2=1.0, max_delta_step=1.0, seed=42, num_boost_round=400, early_stopping=50",
+    "L2_rounds_pure": 59
+  },
+  "anchors_expected": {
+    "L1": {
+      "random": 0.571,
+      "heldout": 0.2402,
+      "time_2018": 0.6973
+    },
+    "L2xt": {
+      "random": 0.6307,
+      "heldout": 0.5158,
+      "time_2018": 0.665
+    },
+    "L2pu": {
+      "random": 0.621,
+      "heldout": 0.5432,
+      "time_2018": 0.6271
+    },
+    "L3": {
+      "random": 0.5554,
+      "heldout": 0.2621,
+      "time_2018": 0.6438
+    }
+  },
+  "anchors_measured": {
+    "L1": {
+      "random": 0.5710306406685237,
+      "heldout": 0.24019312009656005,
+      "time_2018": 0.6973365617433414
+    },
+    "L2xt": {
+      "random": 0.6307095094096244,
+      "heldout": 0.5157779403567446,
+      "time_2018": 0.6649824618500035
+    },
+    "L2pu": {
+      "random": 0.6210237523055588,
+      "heldout": 0.5432350124976404,
+      "time_2018": 0.6271320198382446
+    },
+    "L3": {
+      "random": 0.555366269165247,
+      "heldout": 0.2620985010706638,
+      "time_2018": 0.643801132787917
+    }
+  },
+  "anchors_pass_all": true,
+  "domain_sizes": {
+    "L1": 13286,
+    "L2": 24113,
+    "L3": 17364
+  }
+}
