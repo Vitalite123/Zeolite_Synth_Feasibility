@@ -530,7 +530,7 @@ def fig_f5(out: Path) -> bool:
                 ecolor="#9fb2bd", elinewidth=1.0, capsize=3.0, zorder=3)
 
     for n_, m_, s_ in zip(ns, mus, sds):
-        t = ax.text(n_, m_ + s_ + 0.004, f"{m_:.4f}", fontsize=6.2, ha="center",
+        t = ax.text(n_, m_ + s_ + 0.004, f"{m_:.4f} ± {s_:.4f}", fontsize=6.2, ha="center",
                     va="bottom", color="#1c2b33")
         reg["texts"].append((f"val_{n_}", t))
 
@@ -650,7 +650,8 @@ SOURCES = {
 # ---------------------------------------------------------------- GA
 def fig_ga(out: Path) -> bool:
     """Graphical abstract（Elsevier：≥531×1328 px，h:w≈5:13）。
-    三段横幅：冻结束读数 → 三解释逐一排除 → 天花板界与行动项。
+    顶部问题条 + 三段横幅：冻结束读数 → 三解释逐一排除 → 天花板界与行动项。
+    问题条对应正文 xtal / pure 双任务定义，不引入任何数字。
     全部为已登记读数（0.6307 / 0.6459 / 0.65 上界 / 24.9%），无新数字。"""
     fig, ax = plt.subplots(figsize=(6.0, 2.4), dpi=DPI)   # 1800×720 px, h:w = 0.4
     fig.subplots_adjust(left=0, right=1, bottom=0, top=1)
@@ -659,20 +660,37 @@ def fig_ga(out: Path) -> bool:
     ax.axis("off")
     reg = new_reg()
 
-    box(ax, reg, (0.02, 0.17), 0.26, 0.66,
-        "Frozen head\non literature data\n\n24,706 records\nrandom AUROC 0.6307",
-        fc=BLUE_L, fs=7.4, linespacing=1.45, label="ga_left")
-    box(ax, reg, (0.33, 0.17), 0.34, 0.66,
-        "Three explanations tested\n\nsame-paper leakage ✗  (LOSO 0.6459)\n"
-        "data volume ✗  (no gain at 2×)\nmodel family ✗  (neural −7–16 pp)",
-        fc=ORANGE_L, fs=7.4, linespacing=1.45, label="ga_mid")
-    box(ax, reg, (0.72, 0.17), 0.26, 0.66,
-        "Ceiling bound\n\n≈ 0.65 · upper CI < 0.69\nset by unrecorded variables\n"
-        "→ log them in benchmarks",
-        fc=GREEN_L, fs=7.4, linespacing=1.45, label="ga_right")
+    txt(ax, reg, 0.5, 0.83,
+        "Will a proposed synthesis recipe crystallise the target zeolite, "
+        "and will it be phase-pure?",
+        "ga_q", fs=9.4, ha="center", va="center", style="italic", color="#1c2b33")
 
-    arrow(ax, reg, "ga_a12", (0.28 + PAD, 0.50), (0.33 - PAD, 0.50))
-    arrow(ax, reg, "ga_a23", (0.67 + PAD, 0.50), (0.72 - PAD, 0.50))
+    panels = [
+        ("ga_left", (0.03, 0.12), 0.25, 0.56, BLUE_L,
+         "Frozen head\non literature data",
+         "24,706 records\nrandom AUROC 0.6307"),
+        ("ga_mid", (0.34, 0.12), 0.32, 0.56, ORANGE_L,
+         "Three explanations tested",
+         "same-paper leakage ✗  (LOSO 0.6459)\ndata volume ✗  (no gain at 2×)\n"
+         "model family ✗  (neural −7~−16 pp)"),
+        ("ga_right", (0.72, 0.12), 0.25, 0.56, GREEN_L,
+         "Ceiling bound",
+         "≈ 0.65 · upper CI < 0.69\nset by unrecorded variables\n→ log them in benchmarks"),
+    ]
+    for label, xy, w, h, fc, head, body in panels:
+        rect = box(ax, reg, xy, w, h, None, fc=fc, label=label)
+        cx, ty, by = xy[0] + w / 2, xy[1] + 0.74 * h, xy[1] + 0.36 * h
+        th = ax.text(cx, ty, head, ha="center", va="center", fontsize=7.4,
+                     fontweight="bold", color="#1c2b33", linespacing=1.35)
+        tb = ax.text(cx, by, body, ha="center", va="center", fontsize=7.4,
+                     color="#1c2b33", linespacing=1.35)
+        reg["contain"].append((f"{label}:head-in-rect", th, rect))
+        reg["contain"].append((f"{label}:body-in-rect", tb, rect))
+        reg["texts"].append((f"{label}:head", th))
+        reg["texts"].append((f"{label}:body", tb))
+
+    arrow(ax, reg, "ga_a12", (0.28 + PAD, 0.40), (0.34 - PAD, 0.40))
+    arrow(ax, reg, "ga_a23", (0.66 + PAD, 0.40), (0.72 - PAD, 0.40))
 
     ok = audit(fig, reg, "GA")
     fig.savefig(out, dpi=DPI)
