@@ -13,39 +13,39 @@
     "height_in": 3.9,
     "source": "P2-2 v0.4 §2.4 · feasibility_scorer_v1_2_report.txt L13–14 · m10_calib_v1_report.txt L49–51"
   },
-  "p22_f3_learning_curve_300dpi.png": {
-    "md5": "efc4ac7cce2b855c101ddfbc4cbea840",
+  "p22_ga_graphical_abstract_300dpi.png": {
+    "md5": "f2758b67a2ab175f6758e3c769be4db5",
     "dpi": 300,
-    "width_in": 7.0,
-    "height_in": 4.3,
-    "source": "wp2_p22_supp_v0_metrics.parquet (S2_curve / S4_fit)"
+    "width_in": 6.0,
+    "height_in": 2.4,
+    "source": "graphical abstract · registered readings only (abstract / §3.2–§3.5 / §4, no new numbers)"
   },
-  "p22_f4_noise_decomposition_300dpi.png": {
-    "md5": "df28b071308d5019489a00d014380ee5",
-    "dpi": 300,
-    "width_in": 7.0,
-    "height_in": 4.0,
-    "source": "wp2_p22_supp_v0_metrics.parquet (S3_noise)"
-  },
-  "p22_f3_framework_300dpi.png": {
+  "p22_f4_framework_300dpi.png": {
     "md5": "9639295bdb537de1eb450d452bdad9a4",
     "dpi": 300,
     "width_in": 7.0,
     "height_in": 3.9,
     "source": "manuscript §3.1 (framework, no data readings)"
   },
-  "p22_f4_learning_curve_300dpi.png": {
+  "p22_f5_learning_curve_300dpi.png": {
     "md5": "efc4ac7cce2b855c101ddfbc4cbea840",
     "dpi": 300,
     "width_in": 7.0,
     "height_in": 4.3,
     "source": "wp2_p22_supp_v0_metrics.parquet (S2_curve / S4_fit)"
   },
-  "p22_f5_noise_decomposition_300dpi.png": {
+  "p22_f6_noise_decomposition_300dpi.png": {
     "md5": "df28b071308d5019489a00d014380ee5",
     "dpi": 300,
     "width_in": 7.0,
     "height_in": 4.0,
     "source": "wp2_p22_supp_v0_metrics.parquet (S3_noise)"
+  },
+  "p22_f3_frozen_bundle_300dpi.png": {
+    "md5": "0a4ae240ac659fea49f836e822f52309",
+    "dpi": 300,
+    "width_in": 7.0,
+    "height_in": 3.9,
+    "source": "§2.5 frozen deployment bundle · feasibility_scorer_v1_2_report.txt L7–18 · supplementary anchor script"
   }
 }

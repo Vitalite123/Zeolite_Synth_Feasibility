@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""P2-2 负结果论文：图 F1–F5（确定性、headless、无新读数）
+"""P2-2 负结果论文：图 F1–F6（确定性、headless、无新读数）
 
 预注册依据：
   图名与内容定义：P2-2_负结果论文_初稿_v0.4_骨架.md Appendix A（F1–F4）
@@ -14,12 +14,14 @@
   F2 常量：三切分构造与审计 v0.4 §2.4；AUROC xtal/pure 六值
           Data/feasibility_scorer_v1_2_report.txt L13–14；
           ECE_post 与 n_test：Data/m10_calib_v1_report.txt L49–51（部署账本）
-  F3 内容：正文 §3.1 声明的诊断链顺序与各工具 target/limit（纯常量，无数据读数）
-  F4 数据：Documentation/P2-2/data/wp2_p22_supp_v0_metrics.parquet
+  F3 常量：§2.5 冻结部署束（共享配置、五臂轮数/温度、12 锚点结构），
+          对照 feasibility_scorer_v1_2_report.txt L7–18 与补充锚点脚本 BUNDLE_T（EMT 温度）
+  F4 内容：正文 §3.1 声明的诊断链顺序与各工具 target/limit（纯常量，无数据读数）
+  F5 数据：Documentation/P2-2/data/wp2_p22_supp_v0_metrics.parquet
           （S2_curve 4 点 mean/sd/n、S4_fit AUC∞/b/c、bootstrap CI 上下界与 n=1000）
-  F5 数据：同上 parquet（S3_noise 四口径 + cover_hart_lo + dup/conflict 组计数）
+  F6 数据：同上 parquet（S3_noise 四口径 + cover_hart_lo + dup/conflict 组计数）
 
-输出：Documentation/P2-2/assets/p22_f{1..5}_*_300dpi.png（JCIM C5：300 dpi，
+输出：Documentation/P2-2/assets/p22_f{1..6}_*_300dpi.png（JCIM C5：300 dpi，
       双栏宽 ≤7 in、深 ≤9.167 in）；manifest 记录于 Documentation/P2-2/data/p22_figs_manifest.json
 
 排版审计（G1 门，防文字压框/越界/相撞——2026-11-04 修订版规则）：
@@ -30,7 +32,7 @@
   R4 框与框的可见边界（含 FancyBboxPatch 的 PAD 外扩）不得互压；
   R5 文本不得压到非所属框，专门捕获语料/读数压相邻框；
   R6 审计不过则 main() fail，不落盘 manifest；
-  F3/F4 版式沿用同六条规则（柱顶标注、CI 带注记先登记后绘制）。
+  F4–F6 版式沿用同六条规则（柱顶标注、CI 带注记先登记后绘制）。
 排版间距按 PAD 实扣：横排框 pitch = w + gap，可见间隙 = gap − 2×PAD，
   F1/F2 的 gap 取 0.070（可见 0.030），避免外扩边框互压。
 画布：7.0 in 满幅（subplots_adjust 0/1/0/1），savefig 不再 bbox_inches="tight"，
@@ -356,7 +358,76 @@ def fig_f2(out: Path) -> bool:
 
 
 # ---------------------------------------------------------------- F3
+P21_T2 = ROOT / "p21_supp_t2.py"
+
+
+def assert_bundle_gate() -> None:
+    """F3 输入门：部署束常量与登记报告逐 token 对照（容差 0）。"""
+    assert DATA_L2.exists() and P21_T2.exists(), "bundle input missing"
+    rep = DATA_L2.read_text(encoding="utf-8", errors="replace")
+    for token in ("T_L1=1.2458", "轮 36, T=0.9434", "早停轮 = 59", "T=1.1836",
+                  "早停@128", "T_L3=1.2845", "12 项锚点 assert"):
+        assert token in rep, f"bundle token missing: {token}"
+    t2 = P21_T2.read_text(encoding="utf-8", errors="replace")
+    assert '"L3emt": 1.2845' in t2, "EMT temperature missing in anchor script"
+
+
 def fig_f3(out: Path) -> bool:
+    """冻结束：一个共享配置 → 五个臂 → 十二个锚点（EMT 臂在锚点集外）。
+    内容为 §2.5 已登记常量（配置、轮数、温度、headline 锚点），无新读数。"""
+    assert_bundle_gate()
+    fig, ax = plt.subplots(figsize=(7.0, 3.9), dpi=DPI)
+    fig.subplots_adjust(left=0, right=1, bottom=0, top=1)
+    ax.set_xlim(0, 1)
+    ax.set_ylim(0, 1)
+    ax.axis("off")
+    reg = new_reg()
+
+    txt(ax, reg, 0.5, 0.955, "one configuration  ·  five arms  ·  twelve anchor readings",
+        "header", fs=7.4, ha="center", va="center", style="italic", color=GREY_T)
+
+    box(ax, reg, (0.025, 0.300), 0.210, 0.440,
+        "Shared configuration\n\nLightGBM\nlearning rate 0.05\n31 leaves\nmin_child_samples 100\n"
+        "L2 regularisation 1.0\nmax_delta_step 1.0\nseed 42",
+        fc="#f4f6f8", fs=6.9, linespacing=1.5, label="config")
+
+    arms = [
+        ("L2 · binary feasibility · xtal labels (headline)\n36 rounds · T = 0.9434",
+         BLUE_L, "arm_l2xt"),
+        ("L2 · binary feasibility · pure labels\n59 rounds · T = 1.1836", "#f7f9fa", "arm_l2pu"),
+        ("L1 · phase classification · 198 classes\n118 rounds · T = 1.2458", "#f7f9fa", "arm_l1"),
+        ("L3 · purity / competition · 200 classes\n128 rounds · T = 1.2845", "#f7f9fa", "arm_l3mc"),
+        ("L3 · binary EMT variant (FAU stacking twin)\nT = 1.2845 · outside the anchor set",
+         ORANGE_L, "arm_emt"),
+    ]
+    aw, ah, pitch, y0 = 0.355, 0.115, 0.165, 0.105
+    for i, (t, c, lb) in enumerate(reversed(arms)):
+        box(ax, reg, (0.335, y0 + i * pitch), aw, ah, t, fc=c, fs=6.8,
+            linespacing=1.4, label=lb)
+
+    box(ax, reg, (0.745, 0.300), 0.230, 0.440,
+        "Twelve anchors\nL1 · L2 xtal · L2 pure · L3\nrandom · heldout · time_2018\n\n"
+        "headline anchor\nrandom AUROC 0.6307095094\n\nsupplementary script\n"
+        "recomputes them; aborts\non any deviation",
+        fc="#e8f0e8", fs=6.8, linespacing=1.5, label="anchors")
+
+    arrow(ax, reg, "a_cfg", (0.025 + 0.210 + PAD, 0.520), (0.335 - PAD, 0.520))
+    arrow(ax, reg, "a_anc", (0.335 + aw + PAD, 0.520), (0.745 - PAD, 0.520))
+
+    txt(ax, reg, 0.5, 0.030,
+        "Sources: §2.5 frozen deployment bundle · feasibility_scorer_v1_2_report.txt L7–18 "
+        "· supplementary anchor script (EMT temperature)",
+        "footnote", fs=5.8, ha="center", va="center", color=FOOT)
+
+    ok = audit(fig, reg, "F3")
+    fig.savefig(out, dpi=DPI)
+    plt.close(fig)
+    print(f"wrote {out.name}")
+    return ok
+
+
+# ---------------------------------------------------------------- F4
+def fig_f4(out: Path) -> bool:
     """研究框架：诊断链六工具（蛇形 1→6）+ 裁决/报告/边界汇入条。
     内容为正文 §3.1 声明的顺序与各工具 target/limit，纯常量，无数据读数。"""
     fig, ax = plt.subplots(figsize=(7.0, 3.9), dpi=DPI)
@@ -402,15 +473,15 @@ def fig_f3(out: Path) -> bool:
         "Sources: manuscript §3.1 (framework) · instrument limitations as declared in the text",
         "footnote", fs=5.8, ha="center", va="center", color=FOOT)
 
-    ok = audit(fig, reg, "F3")
+    ok = audit(fig, reg, "F4")
     fig.savefig(out, dpi=DPI)
     plt.close(fig)
     print(f"wrote {out.name}")
     return ok
 
 
-# ---------------------------------------------------------------- F4
-def fig_f4(out: Path) -> bool:
+# ---------------------------------------------------------------- F5
+def fig_f5(out: Path) -> bool:
     """学习曲线 + 预注册饱和拟合 + AUC∞ 的 bootstrap 区间。
     数据：S2_curve（4 点 mean/sd/n）、S4_fit（AUC∞/b/c 与 1,000 次自助 CI）。
     版式：对数横轴、误差棒、拟合实线、渐近虚线与 CI 带；不引入新读数。"""
@@ -481,15 +552,15 @@ def fig_f4(out: Path) -> bool:
                  fontsize=5.8, ha="center", va="center", color=FOOT)
     reg["texts"].append(("footnote", t))
 
-    ok = audit(fig, reg, "F4")
+    ok = audit(fig, reg, "F5")
     fig.savefig(out, dpi=DPI)
     plt.close(fig)
     print(f"wrote {out.name}")
     return ok
 
 
-# ---------------------------------------------------------------- F5
-def fig_f5(out: Path) -> bool:
+# ---------------------------------------------------------------- F6
+def fig_f6(out: Path) -> bool:
     """噪声分解：ε_dup / ε_1nn / ε_1nn_xdoi / ε_model 四口径柱图。
     数据：S3_noise（noise_rate、dup/conflict 组计数、cover_hart_lo）。
     版式：柱顶数值、Cover–Hart 下界虚线、顶部两条读数注记。"""
@@ -554,7 +625,7 @@ def fig_f5(out: Path) -> bool:
                  fontsize=5.8, ha="center", va="center", color=FOOT)
     reg["texts"].append(("footnote", t))
 
-    ok = audit(fig, reg, "F5")
+    ok = audit(fig, reg, "F6")
     fig.savefig(out, dpi=DPI)
     plt.close(fig)
     print(f"wrote {out.name}")
@@ -566,15 +637,53 @@ SOURCES = {
         "P2-2 v0.4 §2.1–§2.3 · wp2_p22_supp_v0_metrics.parquet · feasibility_scorer_v1_2_report.txt",
     "p22_f2_three_splits_300dpi.png":
         "P2-2 v0.4 §2.4 · feasibility_scorer_v1_2_report.txt L13–14 · m10_calib_v1_report.txt L49–51",
-    "p22_f3_framework_300dpi.png": "manuscript §3.1 (framework, no data readings)",
-    "p22_f4_learning_curve_300dpi.png": "wp2_p22_supp_v0_metrics.parquet (S2_curve / S4_fit)",
-    "p22_f5_noise_decomposition_300dpi.png": "wp2_p22_supp_v0_metrics.parquet (S3_noise)",
+    "p22_f3_frozen_bundle_300dpi.png":
+        "§2.5 frozen deployment bundle · feasibility_scorer_v1_2_report.txt L7–18 · supplementary anchor script",
+    "p22_f4_framework_300dpi.png": "manuscript §3.1 (framework, no data readings)",
+    "p22_f5_learning_curve_300dpi.png": "wp2_p22_supp_v0_metrics.parquet (S2_curve / S4_fit)",
+    "p22_f6_noise_decomposition_300dpi.png": "wp2_p22_supp_v0_metrics.parquet (S3_noise)",
+    "p22_ga_graphical_abstract_300dpi.png":
+        "graphical abstract · registered readings only (abstract / §3.2–§3.5 / §4, no new numbers)",
 }
+
+
+# ---------------------------------------------------------------- GA
+def fig_ga(out: Path) -> bool:
+    """Graphical abstract（Elsevier：≥531×1328 px，h:w≈5:13）。
+    三段横幅：冻结束读数 → 三解释逐一排除 → 天花板界与行动项。
+    全部为已登记读数（0.6307 / 0.6459 / 0.65 上界 / 24.9%），无新数字。"""
+    fig, ax = plt.subplots(figsize=(6.0, 2.4), dpi=DPI)   # 1800×720 px, h:w = 0.4
+    fig.subplots_adjust(left=0, right=1, bottom=0, top=1)
+    ax.set_xlim(0, 1)
+    ax.set_ylim(0, 1)
+    ax.axis("off")
+    reg = new_reg()
+
+    box(ax, reg, (0.02, 0.17), 0.26, 0.66,
+        "Frozen head\non literature data\n\n24,706 records\nrandom AUROC 0.6307",
+        fc=BLUE_L, fs=7.4, linespacing=1.45, label="ga_left")
+    box(ax, reg, (0.33, 0.17), 0.34, 0.66,
+        "Three explanations tested\n\nsame-paper leakage ✗  (LOSO 0.6459)\n"
+        "data volume ✗  (no gain at 2×)\nmodel family ✗  (neural −7–16 pp)",
+        fc=ORANGE_L, fs=7.4, linespacing=1.45, label="ga_mid")
+    box(ax, reg, (0.72, 0.17), 0.26, 0.66,
+        "Ceiling bound\n\n≈ 0.65 · upper CI < 0.69\nset by unrecorded variables\n"
+        "→ log them in benchmarks",
+        fc=GREEN_L, fs=7.4, linespacing=1.45, label="ga_right")
+
+    arrow(ax, reg, "ga_a12", (0.28 + PAD, 0.50), (0.33 - PAD, 0.50))
+    arrow(ax, reg, "ga_a23", (0.67 + PAD, 0.50), (0.72 - PAD, 0.50))
+
+    ok = audit(fig, reg, "GA")
+    fig.savefig(out, dpi=DPI)
+    plt.close(fig)
+    print(f"wrote {out.name}")
+    return ok
 
 
 def main() -> None:
     load_metrics()
-    which = sys.argv[1:] or ["f1", "f2", "f3", "f4", "f5"]
+    which = sys.argv[1:] or ["f1", "f2", "f3", "f4", "f5", "f6"]
     outs = []
     if "f1" in which:
         o = ASSETS / "p22_f1_label_derivation_300dpi.png"
@@ -585,16 +694,24 @@ def main() -> None:
         if fig_f2(o):
             outs.append(o)
     if "f3" in which:
-        o = ASSETS / "p22_f3_framework_300dpi.png"
+        o = ASSETS / "p22_f3_frozen_bundle_300dpi.png"
         if fig_f3(o):
             outs.append(o)
     if "f4" in which:
-        o = ASSETS / "p22_f4_learning_curve_300dpi.png"
+        o = ASSETS / "p22_f4_framework_300dpi.png"
         if fig_f4(o):
             outs.append(o)
     if "f5" in which:
-        o = ASSETS / "p22_f5_noise_decomposition_300dpi.png"
+        o = ASSETS / "p22_f5_learning_curve_300dpi.png"
         if fig_f5(o):
+            outs.append(o)
+    if "f6" in which:
+        o = ASSETS / "p22_f6_noise_decomposition_300dpi.png"
+        if fig_f6(o):
+            outs.append(o)
+    if "ga" in which:
+        o = ASSETS / "p22_ga_graphical_abstract_300dpi.png"
+        if fig_ga(o):
             outs.append(o)
 
     from PIL import Image
